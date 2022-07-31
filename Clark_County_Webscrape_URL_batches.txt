@@ -1,0 +1,136 @@
+# USing TRY/EXCEPT to CATCH ERRORS
+
+import requests
+from bs4 import BeautifulSoup as bs 
+import re 
+import pandas as pd 
+import numpy as np
+import os
+os.getcwd()
+import string
+!pip install xlsxwriter
+import xlsxwriter
+import itertools
+
+#UPLOAD APN URL FILE
+APN_URL_sample = []
+APN_URL_sample  = pd.read_excel('/content/APN URL VECTOR.xlsx')
+APN_URL_list = list(APN_URL_sample['APN URL'])
+
+Results_Object = None
+
+for URL in itertools.islice(APN_URL_list,751235,751240):
+  try:
+    #Connect to URL for HTML page source code
+    load = requests.get(URL)
+   #Convert to a beautiful soup object
+    soup = bs(load.content)
+
+    ###################################################
+    #Scrape values from HTML using id
+    APN_value = soup.find(id = "lblParcel").contents
+    Owner = soup.find(id = "lblOwner1").contents 
+
+    #ADDRESS 
+    Address1 = soup.find(id = "lblAddr1").contents 
+    Address2 = soup.find(id = "lblAddr2").contents 
+    Address3 = soup.find(id = "lblAddr3").contents 
+    Address4 = soup.find(id = "lblAddr4").contents 
+    Address5 = soup.find(id = "lblAddr5").contents 
+
+    Location_Add = soup.find(id = "lblLocation").contents  
+    City_Unincorp_town = soup.find(id = "lblTown").contents 
+
+    Assess_Desc1 = soup.find(id = "lblDesc1").contents 
+    Assess_Desc2 = soup.find(id = "lblDesc2").contents 
+    Assess_Desc3 = soup.find(id = "lblDesc3").contents 
+
+    Record_doc_No = soup.find(id = "RecDoc").contents  
+    Record_date =  soup.find(id = "lblRecDate").contents
+    Vesting =  soup.find(id = "lblVest").contents
+
+    #Appraisal
+    Tax_District = soup.find(id = "lblTaxDist").contents 
+    Appraisal_YR = soup.find(id = "lblApprYr").contents 
+
+    #REAL PROPERTY ASSESSED VALUE  (Two Fiscal periods 2020-2021 and 2021-2022)
+    Land_20_21 = soup.find(id = "lblLand1").contents 
+    Land_21_22 = soup.find(id = "lblLand2").contents 
+    #
+    Improvements_20_21 = soup.find(id = "lblImp1").contents 
+    Improvements_21_22 = soup.find(id = "lblImp2").contents 
+    #
+    Gross_Assessed_Sub_20_21 = soup.find(id = "lblGross1").contents 
+    Gross_Assessed_Sub_21_22 = soup.find(id = "lblGross2").contents 
+    #
+    Taxable_LnI_20_21 = soup.find(id = "lblTaxVal1").contents 
+    Taxable_LnI_21_22 = soup.find(id = "lblTaxVal2").contents 
+    #
+    Tot_Ass_Val_20_21 = soup.find(id = "lblTAssessed1").contents 
+    Tot_Ass_Val_21_22 = soup.find(id = "lblTAssessed2").contents 
+    #
+    Tot_Tax_Val__20_21 = soup.find(id = "lblTTaxable1").contents 
+    Tot_Tax_Val_21_22  = soup.find(id = "lblTTaxable2").contents 
+
+    #Estimated Lot Size and Apprasial Info
+    Est_Size = soup.find(id = "lblAcres").contents 
+    Org_Construct_Yr  = soup.find(id = "lblConstrYr").contents 
+    Last_Sale_Price = soup.find(id = "lblSalePrice").contents 
+    Month_YR = soup.find(id = "lblSaleDate").contents 
+    Sale_Type = soup.find(id = "lblSaleType").contents 
+    Land_use =soup.find(id = "lblLandUse").contents 
+    Dwelling_unit = soup.find(id = "lblUnits").contents 
+
+    #Primary Residential Structure  
+    Floor1_sqr = soup.find(id = "lblFirstFloor").contents 
+    Floor2_sqr = soup.find(id = "lblSecondFloor").contents 
+    Floor3_sqr = soup.find(id = "lblThirdFloor").contents 
+
+    Unfin_base = soup.find(id = "lblUnfinishedBasement").contents 
+    Fin_base = soup.find(id = "lblFinishedBasement").contents
+    Base_Garage = soup.find(id = "lblBasementGarage").contents 
+    Tot_Garage = soup.find(id = "lblGarage").contents 
+
+    Casita_sq = soup.find(id = "lblCasita").contents 
+    Carport = soup.find(id = "lblCarPort").contents
+    Style = soup.find(id = "lblStories").contents
+    Bedrooms  = soup.find(id = "lblBedrooms").contents
+    Bathrooms = soup.find(id = "lblBath").contents
+
+    ADDN_CONV = soup.find(id = "lblAddition").contents
+    Pool =  soup.find(id = "lblPool").contents
+    Spa = soup.find(id = "lblSpa").contents
+    Construct_type = soup.find(id = "lblConstType" ).contents
+    Roof_type = soup.find(id = "lblRoof" ).contents
+    Fireplace = soup.find(id = "lblFireplace").contents
+###################################################
+
+    #Create a list object for all the scraped items
+    Row_list = [APN_value, Owner, Address1,Address2,Address3,Address4,Address5, Location_Add, City_Unincorp_town, Assess_Desc1, Assess_Desc2, Assess_Desc3, Record_doc_No, Record_date, Vesting, 
+                        Tax_District,Appraisal_YR,Land_20_21,Land_21_22, Improvements_20_21, Improvements_21_22, Gross_Assessed_Sub_20_21, Gross_Assessed_Sub_21_22 ,
+                        Taxable_LnI_20_21, Taxable_LnI_21_22, Tot_Ass_Val_20_21, Tot_Ass_Val_21_22, Tot_Tax_Val__20_21, Tot_Tax_Val_21_22, Est_Size, 
+                         Org_Construct_Yr, Last_Sale_Price, Month_YR, Sale_Type, Land_use, Dwelling_unit, Floor1_sqr, Floor2_sqr, Floor3_sqr,     
+                        Unfin_base, Fin_base, Base_Garage, Tot_Garage, Casita_sq, Carport, Style, Bedrooms, Bathrooms,ADDN_CONV, Pool, Spa, Construct_type,
+                       Roof_type, Fireplace]
+
+    if Results_Object == None :
+      Results_Object = Row_list # To start first row
+    else: #Append the new row 2nd, 3rd, etc.
+      Results_Object.append(Row_list)
+
+  except Exception as ex:
+    pass
+
+
+#Create dataframe object from list of lists created by loop
+Web_Scrape_Results = pd.DataFrame.from_records(Results_Object)
+#Create Excel Writer object for file title
+writer = pd.ExcelWriter('Clark_Web_Scrape_Exceptions_passed_751235_751240.xlsx')
+#Write dataframe to excel
+Web_Scrape_Results.to_excel(writer)
+#Save the Excel
+writer.save()
+print('Dataframe successfully written to Excel')
+
+
+
